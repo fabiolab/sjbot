@@ -43,10 +43,18 @@ bot.remove_command("help")
 @bot.group(invoke_without_command=True)
 async def help(ctx):
     em = discord.Embed(title="Help",
-                       description=f"Utilise {BOT_PREFIX}<commande> pour interroger SJBot",
-                       color=discord.Colour.dark_orange())
-    em.add_field(name="Information", value="info, top")
-    em.add_field(name="Misc", value="alive, hello")
+                       description=f"""Utilise `{BOT_PREFIX}<commande>` pour interroger SJBot
+
+                                   `{BOT_PREFIX}info numero_licence`
+                                   Tout ce qu'on peut vouloir savoir sur un joueur ou presque
+
+                                   `{BOT_PREFIX}top [sh,sd,dh,dd,dm]`
+                                   Le top 20 du club dans une discipline
+
+                                   `{BOT_PREFIX}hello`
+                                   N'oublie pas de dire bonjour au bot 
+                        """,
+                       color=discord.Colour.orange())
     await ctx.send(embed=em)
 
 
