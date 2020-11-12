@@ -22,7 +22,10 @@ RANKS_EMOJII = {
 
 STRAVA_TITLES = ["Well done !", "Bravo ! ", "Bien joué !", "Forza !", "Youhou !"]
 BRAVO_EMOJIS = [":smile:", ":snake:", ":smiley:", ":astonished:", ":+1:", ":smirk:", ":running:", ":dash:", ":ok_hand:",
-                ":muscle:", ":clap:", ":punch:", ":tada:", ":trophy:", ":alien:"]
+                ":muscle:", ":clap:", ":punch:", ":tada:", ":trophy:", ":alien:"":sparkles:", ":star:", ":star2:",
+                ":dizzy:", ":boom:", ":sunglasses:", ":purple_heart:", ":heart:", ":green_heart:", ":broken_heart:",
+                ":heartbeat:", ":heartpulse:", ":two_hearts:", ":revolving_hearts:", ":cupid:", ":sparkling_heart:",
+                ":gun:", ":pill:", ":syringe:"]
 
 
 def transform_rank(rank: str) -> str:
