@@ -85,7 +85,7 @@ async def info(ctx, licence: str):
     await ctx.send(response)
 
 
-@tasks.loop(seconds=5.0)
+@tasks.loop(minutes=5.0)
 async def check_strava():
     logger.info("cheking strava for new activities")
 
