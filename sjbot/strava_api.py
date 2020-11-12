@@ -15,7 +15,7 @@ class StravaApi:
 
     def __init__(self):
         if not pathlib.Path(CREDENTIALS_PATHFILE).exists():
-            raise FileNotFoundError("Define a credential file firstœ")
+            raise FileNotFoundError("Define a credential file first")
         self.last_hash = ""
 
     @staticmethod

@@ -72,4 +72,5 @@ class BotMessages:
 
     @staticmethod
     def new_strava_activities_title() -> str:
-        return f"{random.choice(STRAVA_TITLES)} {emojis.encode(random.choice(BRAVO_EMOJIS))}"
+        emoticons = [emojis.encode(random.choice(BRAVO_EMOJIS)) for i in range(5)]
+        return f"{random.choice(STRAVA_TITLES)} {''.join(emoticons)}"
