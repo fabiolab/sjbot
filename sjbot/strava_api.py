@@ -1,6 +1,7 @@
 import requests
 import json
 from loguru import logger
+import pathlib
 
 CREDENTIALS_PATHFILE = ".secret/strava_credentials.json"
 
@@ -13,6 +14,8 @@ CLUB_ID = "776155"
 class StravaApi:
 
     def __init__(self):
+        if not pathlib.Path(CREDENTIALS_PATHFILE).exists():
+            raise FileNotFoundError("Define a credential file firstœ")
         self.last_hash = ""
 
     @staticmethod
