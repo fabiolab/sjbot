@@ -1,6 +1,6 @@
 # Data folder
 /data/
-credentials.json
+*credentials.json
 *.env
 p3.6
 
