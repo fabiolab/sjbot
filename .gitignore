@@ -1,6 +1,7 @@
 # Data folder
 /data/
 *credentials.json
+.secret
 *.env
 p3.6
 

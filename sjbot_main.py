@@ -1,29 +1,21 @@
 import os
 import sys
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from sjbot.ffbad_api import FFBadApi
+from sjbot.giphy_api import GiphyApi
+from sjbot.strava_api import StravaApi
 from loguru import logger
+from sjbot.bot_messages import BotMessages
 
 BOT_PREFIX = '$'
-RANKS_EMOJII = {
-    "R6": "<:R6:710586107560984680>",
-    "R5": "<:R5:710586107737276537>",
-    "R4": "<:R4:710586107426766889>",
-    "P12": "<:P12:710583882776576161>",
-    "P11": "<:P11:710586107397406720>",
-    "P10": "<:P10:710586107124908043>",
-    "NC": "<:NC:710586107724824617>",
-    "N3": "<:N3:710586107477098587>",
-    "N2": "<:N2:710586107703853087>",
-    "N1": "<:N1:710586107653259324>",
-    "D9": "<:D9:710586107561115669>",
-    "D8": "<:D8:710586107712241765>",
-    "D7": "<:D7:710586107389018195>",
-}
+
+api_ffbad = FFBadApi()
+api_strava = StravaApi()
+# api_giphy = GiphyApi(os.getenv('GIPHY_API_KEY'))
 
 bot = commands.Bot(command_prefix=BOT_PREFIX)
-api_client = FFBadApi()
+bot_messages = BotMessages()
 
 bot.remove_command("help")
 
@@ -43,17 +35,7 @@ bot.remove_command("help")
 @bot.group(invoke_without_command=True)
 async def help(ctx):
     em = discord.Embed(title="Help",
-                       description=f"""Utilise `{BOT_PREFIX}<commande>` pour interroger SJBot
-
-                                   `{BOT_PREFIX}info numero_licence`
-                                   Tout ce qu'on peut vouloir savoir sur un joueur ou presque
-
-                                   `{BOT_PREFIX}top [sh,sd,dh,dd,dm]`
-                                   Le top 20 du club dans une discipline
-
-                                   `{BOT_PREFIX}hello`
-                                   N'oublie pas de dire bonjour au bot 
-                        """,
+                       description=bot_messages.help(BOT_PREFIX),
                        color=discord.Colour.orange())
     await ctx.send(embed=em)
 
@@ -71,31 +53,17 @@ async def alive(ctx):
 )
 async def hello(ctx):
     logger.info("Saying hello")
-    await ctx.send('''
-Hello ! Je suis le bot SJB
-
-Je sais pas faire grand chose mais tu peux m'utiliser pour avoir des infos sur un joueur ou le top du sjb.
-```
-$info "un numero de licence"
-$top "sh" ou $top "sd" ou $top "dd" ...
-```
-''')
+    await ctx.send(bot_messages.hello())
 
 
 @bot.command(
     help="Donne les tops joueurs du club.\n `$top sh` - $top sd - $top dd - $top dm - $top dh"
 )
 async def top(ctx, discipline: str):
-    top_players = api_client.get_club_top(discipline)
+    top_players = api_ffbad.get_club_top(discipline)
 
     logger.info(top_players[:5])
-    response = f'\n**TOP 20 Sjb en {discipline.upper()} !**\n'
-    if not top_players:
-        response += "Aucun joueur"
-        top_players = []
-
-    for player in top_players[:20]:
-        response += f'{player.get("rank")}. {player.get("name")} ({player.get("subLevel")} - nat : {player.get("frenchRank")})\n'
+    response = bot_messages.top(discipline, top_players)
 
     await ctx.send(response)
 
@@ -105,26 +73,35 @@ async def top(ctx, discipline: str):
 )
 async def info(ctx, licence: str):
     logger.info(f"Getting info for {licence}")
-    player_info = api_client.get_player_info(licence)
+    player_info = api_ffbad.get_player_info(licence)
     if not player_info:
         response = f"Aucun joueur trouvé pour la licence {licence}"
     else:
-        player_rank = api_client.get_player_ranking(player_info.get('personId'), licence)
-        response = f'''
+        player_rank = api_ffbad.get_player_ranking(player_info.get('personId'), licence)
+        response = bot_messages.info_player(licence, player_info.get('firstName'), player_info.get('lastName'),
+                                            player_info.get('player').get('category'),
+                                            player_rank)
 
-    Voilà tout ce que je sais sur la licence **{licence}**
-
-    **{player_info.get('firstName')} {player_info.get('lastName')}** ({player_info.get('player').get('category')})
-        - Simple : {transform_rank(player_rank.get('simpleSubLevel'))} (best : {transform_rank(player_rank.get('bestSimpleSubLevel'))}) - {player_rank.get('simpleRate')} points
-        - Double : {transform_rank(player_rank.get('doubleSubLevel'))} (best : {transform_rank(player_rank.get('bestDoubleSubLevel'))}) - {player_rank.get('doubleRate')} points
-        - Mixte : {transform_rank(player_rank.get('mixteSubLevel'))} (best : {transform_rank(player_rank.get('bestMixteSubLevel'))}) - {player_rank.get('mixteRate')} points
-
-    '''
     await ctx.send(response)
 
 
-def transform_rank(rank: str) -> str:
-    return RANKS_EMOJII.get(rank.upper(), rank)
+@tasks.loop(seconds=5.0)
+async def check_strava():
+    logger.info("cheking strava for new activities")
+
+    last_activities = api_strava.get_activities()
+
+    if not last_activities:
+        return
+
+    em = discord.Embed(title=bot_messages.new_strava_activities_title(),
+                       description=bot_messages.new_strava_activities(last_activities),
+                       color=discord.Colour.orange())
+
+    # em.set_image(url=api_giphy.get_a_gif('run'))
+    logger.info(f"sending message to the channel {STRAVA_CHANNEL}")
+    channel = await bot.fetch_channel(STRAVA_CHANNEL)
+    await channel.send(embed=em)
 
 
 if __name__ == '__main__':
@@ -132,6 +109,13 @@ if __name__ == '__main__':
         logger.error("No token found for discord bot. Check your env variables and set 'BOT_TOKEN'")
         sys.exit(1)
 
-    bot_token = os.getenv('BOT_TOKEN')
+    if not os.getenv('STRAVA_CHANNEL'):
+        logger.error("No strava channel for discord bot. Check your env variables and set 'STRAVA_CHANNEL'")
+        sys.exit(1)
+
+    BOT_TOKEN = os.getenv('BOT_TOKEN')
+    STRAVA_CHANNEL = os.getenv('STRAVA_CHANNEL')
+
     logger.info("Running the bot ...")
-    bot.run(bot_token)
+    check_strava.start()
+    bot.run(BOT_TOKEN)

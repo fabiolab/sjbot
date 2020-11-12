@@ -1,6 +1,9 @@
 from jinja2 import Environment, FileSystemLoader
+from loguru import logger
+import random
+import emojis
 
-TEMPLATES_DIR = "../templates"
+TEMPLATES_DIR = ["../templates", "templates"]
 RANKS_EMOJII = {
     "R6": "<:R6:710586107560984680>",
     "R5": "<:R5:710586107737276537>",
@@ -16,6 +19,10 @@ RANKS_EMOJII = {
     "D8": "<:D8:710586107712241765>",
     "D7": "<:D7:710586107389018195>",
 }
+
+STRAVA_TITLES = ["Well done !", "Bravo ! ", "Bien joué !", "Forza !", "Youhou !"]
+BRAVO_EMOJIS = [":smile:", ":snake:", ":smiley:", ":astonished:", ":+1:", ":smirk:", ":running:", ":dash:", ":ok_hand:",
+                ":muscle:", ":clap:", ":punch:", ":tada:", ":trophy:", ":alien:"]
 
 
 def transform_rank(rank: str) -> str:
@@ -55,3 +62,11 @@ class BotMessages:
         }
         return template.render(licence=licence, first_name=first_name, last_name=last_name, category=category,
                                ranks=ranks)
+
+    def new_strava_activities(self, activities: list) -> str:
+        template = self.env.get_template('strava_activities.tpl')
+        return template.render(activities=activities, round=round)
+
+    @staticmethod
+    def new_strava_activities_title() -> str:
+        return f"{random.choice(STRAVA_TITLES)} {emojis.encode(random.choice(BRAVO_EMOJIS))}"

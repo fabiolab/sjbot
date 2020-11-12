@@ -65,3 +65,14 @@ def test_info_player():
     rendered = bm.info_player(**player)
     assert 'N3' in rendered
     assert '12345' in rendered
+
+
+def test_strava_activities():
+    activities = [{'resource_state': 2, 'athlete': {'resource_state': 2, 'firstname': 'Xavier', 'lastname': 'G.'},
+                   'name': 'Course',
+                   'distance': 8030.0, 'moving_time': 2182, 'elapsed_time': 2191, 'total_elevation_gain': 15.0,
+                   'type': 'Run',
+                   'workout_type': None}]
+    rendered = bm.new_strava_activities(activities)
+    print(rendered)
+    assert 'nouvelle sortie' in rendered
