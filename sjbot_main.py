@@ -62,8 +62,12 @@ async def hello(ctx):
 async def top(ctx, discipline: str):
     top_players = api_ffbad.get_club_top(discipline)
 
-    logger.info(top_players[:5])
-    response = bot_messages.top(discipline, top_players)
+    if not top_players:
+        response = "Aucun top trouvé. Essaye encore avec une de ces disciplines : sh, sd, dd, dm, dh, dx"
+        logger.info(response)
+    else:
+        logger.info(top_players[:5])
+        response = bot_messages.top(discipline, top_players)
 
     await ctx.send(response)
 
@@ -85,7 +89,7 @@ async def info(ctx, licence: str):
     await ctx.send(response)
 
 
-@tasks.loop(minutes=5.0)
+@tasks.loop(minutes=15.0)
 async def check_strava():
     logger.info("cheking strava for new activities")
 

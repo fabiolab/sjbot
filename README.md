@@ -16,6 +16,19 @@ pip install -r requirements.txt
 ```
 You will have to set the required env variables:
 - BOT_TOKEN: you will get one from the discord developper page
+- STRAVA_CHANNEL: allow to post a club activity in a given channel
+
+To make strava api works, you will have to set a credentials file containing a json conf:
+```
+.secret/strava_credentials.json
+
+{
+	"client_id": "",
+	"client_secret": "",
+	"access_token": "",
+	"refresh_token": ""
+}
+```
 
 ## Launch
 To launch the bot, just run the main script:
@@ -27,3 +40,4 @@ python sjbot_main.py
 The bot has two commands:
 - $info "licence_number": displays all the available information about the player
 - $top "discipline": displays the SJB top 20 players in the selected discipline ("sh", "sd", "dd", "dh", "dm") 
+

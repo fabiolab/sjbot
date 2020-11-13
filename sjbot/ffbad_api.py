@@ -81,7 +81,11 @@ class FFBadApi:
     @staticmethod
     def get_club_top(discipline: str):
         now = pendulum.now()
-        discipline = DISCIPLINE_MAP.get(discipline.lower(), 1)
+        try:
+            discipline = DISCIPLINE_MAP[discipline.lower()]
+        except KeyError:
+            logger.warning(f"Unknown discipline {discipline}")
+            return []
         payload = f'{{"discipline":{discipline},"dateFrom":"{now}","top":500,"instanceId":{SJB_ID},"isFirstLoad":false,"sort":"nom-ASC"}}'
         headers = {
             'Host': 'www.myffbad.fr',
