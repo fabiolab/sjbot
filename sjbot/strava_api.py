@@ -67,11 +67,18 @@ class StravaApi:
 
         new_activities = []
         for activity in activities:
-            if hash(frozenset(json.dumps(activity))) == self.last_hash:
+            if self.get_hash(activity) == self.last_hash:
                 break
             new_activities.append(activity)
         if new_activities:
-            self.last_hash = hash(frozenset(json.dumps(new_activities[0])))
+            self.last_hash = self.get_hash(new_activities[0])
 
         logger.info(new_activities)
         return new_activities
+
+    @staticmethod
+    def get_hash(activity: dict) -> int:
+        informations = f"{activity.get('athlete', {}).get('firstname')}{activity.get('distance')}" \
+                       f"{activity.get('moving_time')}{activity.get('elapsed_time')}" \
+                       f"{activity.get('total_elevation_gain')}"
+        return hash(frozenset(informations))
