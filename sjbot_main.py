@@ -89,7 +89,7 @@ async def info(ctx, licence: str):
     await ctx.send(response)
 
 
-@tasks.loop(minutes=15.0)
+@tasks.loop(minutes=5.0)
 async def check_strava():
     logger.info("cheking strava for new activities")
 
@@ -99,7 +99,7 @@ async def check_strava():
         return
 
     em = discord.Embed(title=bot_messages.new_strava_activities_title(),
-                       description=bot_messages.new_strava_activities(last_activities),
+                       description=bot_messages.new_strava_activities(last_activities[0]),
                        color=discord.Colour.orange())
 
     # em.set_image(url=api_giphy.get_a_gif('run'))
