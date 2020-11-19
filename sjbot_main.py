@@ -99,7 +99,7 @@ async def check_strava():
         return
 
     em = discord.Embed(title=bot_messages.new_strava_activities_title(),
-                       description=bot_messages.new_strava_activities(last_activities[0]),
+                       description=bot_messages.new_strava_activities(last_activities),
                        color=discord.Colour.orange())
 
     # em.set_image(url=api_giphy.get_a_gif('run'))
